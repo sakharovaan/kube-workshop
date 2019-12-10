@@ -1,0 +1,50 @@
+---
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Add an apt signing key for Kubernetes
+  apt_key:
+    url: "{{ kubernetes_apt_key_url }}"
+    state: present
+
+- name: Adding apt repository for Kubernetes
+  apt_repository:
+    repo: "{{ kubernetes_apt_repository }}"
+    state: present
+    filename: kubernetes.list
+
+- name: Install Kubernetes binaries
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ kubernetes_packages }}"
+  notify:
+    - restart kubelet
+
+- name: Configure node ip
+  lineinfile:
+    path: /etc/default/kubelet
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+  notify:
+    - restart kubelet
+
+- name: Check if kubelet.conf exists
+  stat:
+    path: "/etc/kubernetes/kubelet.conf"
+  register: kubelet_conf
+
+- name: Join to cluster if needed
+  include_tasks: join.yml
+  when: not kubelet_conf.stat.exists

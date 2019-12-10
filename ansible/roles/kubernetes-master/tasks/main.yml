@@ -1,0 +1,60 @@
+---
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Add an apt signing key for Kubernetes
+  apt_key:
+    url: "{{ kubernetes_apt_key_url }}"
+    state: present
+
+- name: Adding apt repository for Kubernetes
+  apt_repository:
+    repo: "{{ kubernetes_apt_repository }}"
+    state: present
+    filename: kubernetes.list
+
+- name: Install Kubernetes binaries
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ kubernetes_packages }}"
+  notify:
+    - restart kubelet
+
+- name: Check if kubeadm has already run
+  stat:
+    path: "/etc/kubernetes/pki/ca.key"
+  register: kubeadm_ca
+
+- name: Init cluster if needed
+  include_tasks: init.yml
+  when: not kubeadm_ca.stat.exists
+  run_once: yes
+
+- name: Enable and check kubelet service
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: started
+    enabled: yes
+  register: started_kubelet
+
+- name: "Copy config file"
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ lookup('env', 'HOME') }}/admin.conf"
+    flat: yes
+  run_once: yes
+  ignore_errors: yes

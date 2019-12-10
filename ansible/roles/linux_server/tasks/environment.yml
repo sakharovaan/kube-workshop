@@ -1,0 +1,13 @@
+---
+
+- name: Configure shell environment
+  template:
+    src: '{{ item }}'
+    dest: '/{{ item }}'
+    validate: bash -n %s
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - etc/profile.d/environment.sh
+    - '{{ common_environment_files }}'

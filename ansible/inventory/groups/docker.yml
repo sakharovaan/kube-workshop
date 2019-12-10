@@ -1,0 +1,6 @@
+---
+
+docker:
+  children:
+    kubernetes_master:
+    kubernetes_node:

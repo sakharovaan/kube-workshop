@@ -1,0 +1,14 @@
+
+# {{ ansible_managed }}
+
+{% if ansible_distribution == 'Ubuntu' %}
+deb {{ common_apt_ubuntu_mirror }}/ubuntu {{ ansible_distribution_release }}-security main restricted universe
+deb {{ common_apt_ubuntu_mirror }}/ubuntu {{ ansible_distribution_release }} main restricted universe
+deb {{ common_apt_ubuntu_mirror }}/ubuntu {{ ansible_distribution_release }}-updates main restricted universe
+deb {{ common_apt_ubuntu_mirror }}/ubuntu {{ ansible_distribution_release }}-backports main restricted universe
+{% elif ansible_distribution == 'Debian' %}
+deb {{ common_apt_debian_mirror }}/debian-security {{ ansible_distribution_release }}/updates main contrib non-free
+deb {{ common_apt_debian_mirror }}/debian {{ ansible_distribution_release }} main contrib non-free
+deb {{ common_apt_debian_mirror }}/debian {{ ansible_distribution_release }}-updates main contrib non-free
+deb {{ common_apt_debian_mirror }}/debian {{ ansible_distribution_release }}-backports main contrib non-free
+{% endif %}

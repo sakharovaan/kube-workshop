@@ -1,0 +1,8 @@
+---
+
+all:
+  hosts:
+    ubuntu-kube-controller.asakharov.local:
+      ansible_host: 192.168.88.187
+      ansible_ssh_user: user
+      ansible_become: yes

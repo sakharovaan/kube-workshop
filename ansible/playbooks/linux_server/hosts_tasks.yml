@@ -1,0 +1,13 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Run tasks for hosts
+      include_tasks: '{{ tasks_file }}'
+      with_first_found:
+        - 'hosts/{{ inventory_hostname }}.yml'
+        - '/dev/null'
+      loop_control:
+        loop_var: tasks_file
+      tags:
+        - linux_server

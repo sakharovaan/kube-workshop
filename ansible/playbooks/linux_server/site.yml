@@ -1,0 +1,18 @@
+---
+
+- import_playbook: bootstrap.yml
+
+- import_playbook: hosts_tasks.yml
+  tags:
+    - bootstrap
+
+- hosts: all
+  roles:
+    - role: linux_server
+      tags:
+        - linux_server
+
+    - role: docker
+      when: '"docker" in group_names'
+      tags:
+        - docker

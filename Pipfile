@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+gitlint = "*"
+yapf = "*"
+
+[packages]
+ansible = "==2.7.*"
+ansible-lint = "*"
+docker-py = "*"
+jmespath = "*"
+molecule = "*"
+python-vagrant = "*"
+zabbix-api = "*"
+
+[requires]
+python_version = "2.7"

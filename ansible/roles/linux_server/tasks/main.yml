@@ -1,0 +1,38 @@
+---
+
+- name: Create /etc/ansible/facts.d
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Setup locales
+  locale_gen:
+    name: '{{ item }}'
+  with_items:
+    - '{{ common_default_locale }}'
+    - '{{ common_locales }}'
+  when: (common_default_locale is defined and common_default_locale)
+     or (common_locales is defined and common_locales)
+
+- name: Set default locale
+  copy:
+    dest: /etc/default/locale
+    content: 'LANG="{{ common_default_locale }}"'
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == 'Debian'
+    and common_default_locale is defined and common_default_locale
+
+- name: Set timezone
+  timezone:
+    name: '{{ common_timezone }}'
+  when: common_timezone is defined and common_timezone
+
+- import_tasks: apt.yml
+  when: ansible_os_family == 'Debian'
+
+- import_tasks: environment.yml

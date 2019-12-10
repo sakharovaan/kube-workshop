@@ -1,0 +1,16 @@
+__pycache__/
+.ansible/
+.ansible/
+.cache/
+.idea/
+.molecule/
+.pytest_cache/
+.vagrant/
+.venv/
+.vscode/
+*.log
+*.pyc
+*.retry
+*.swp
+ansible/ansible.cfg
+WIP.md

@@ -1,0 +1,5 @@
+---
+
+kubernetes_node:
+  hosts:
+    ubuntu-kube-node-1.asakharov.local:

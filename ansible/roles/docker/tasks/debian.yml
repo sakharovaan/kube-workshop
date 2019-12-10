@@ -1,0 +1,65 @@
+---
+
+- name: Uninstall old versions
+  apt:
+    name:
+      - docker
+      - docker-engine
+    state: absent
+    purge: yes
+
+- name: Install dependencies
+  apt:
+    name: '{{ docker_package_dependencies }}'
+    state: present
+    install_recommends: no
+
+- name: Add Docker repository key
+  apt_key:
+    url: '{{ docker_apt_key_url }}'
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: '{{ docker_apt_repository }}'
+    filename: docker
+    state: present
+
+- name: Install docker
+  apt:
+    name: '{{ docker_package }}{{ docker_package_version }}'
+    state: present
+    install_recommends: no
+
+- name: Hold docker package
+  dpkg_selections:
+    name: '{{ docker_package }}'
+    selection: '{{ docker_package_hold | d(install) }}'
+
+- name: Set docker daemon options
+  copy:
+    content: |
+      {{ docker_options | to_nice_json }}
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - restart docker
+  when: docker_options is defined and docker_options
+
+- name: Install docker-compose
+  get_url:
+    url: '{{ docker_compose_download }}'
+    dest: /usr/local/bin/docker-compose
+    owner: root
+    group: root
+    mode: 0755
+    force: '{{ docker_compose_update | d(no) }}'
+  when: docker_compose_install is defined and docker_compose_install
+
+- name: Add user to docker group
+  user:
+    name: user
+    groups: docker
+    append: yes

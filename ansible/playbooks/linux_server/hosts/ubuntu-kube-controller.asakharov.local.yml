@@ -1,0 +1,17 @@
+---
+
+- name: Set hostname
+  hostname:
+    name: '{{ inventory_hostname }}'
+
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+
+- name: Remove dependencies that are no longer required and remove useless packages from the cache
+  apt:
+    autoremove: yes
+    autoclean: yes
+
+- name: Reboot and wait
+  reboot:

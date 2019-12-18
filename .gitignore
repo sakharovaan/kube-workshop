@@ -12,5 +12,5 @@ __pycache__/
 *.pyc
 *.retry
 *.swp
-ansible/ansible.cfg
+ansible.cfg
 WIP.md

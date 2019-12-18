@@ -1,0 +1,102 @@
+---
+
+- name: Collect facts
+  setup:
+  tags:
+    - always
+    - kube_node_join
+
+- name: Install prereq packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+    - haproxy
+    - lvm2
+
+- name: Create directories tree
+  file:
+    path: '/{{ item.path }}'
+    state: directory
+  with_filetree:
+    - files/
+  when: item.state == 'directory'
+
+- name: Copy config files
+  template:
+    src: '{{ item.src }}'
+    dest: '/{{ item.path }}'
+  with_filetree:
+    - files/
+  notify:
+    - reload sysctl
+    - restart containerd
+    - restart kubelet
+    - restart haproxy
+  when: item.state == 'file'
+
+- name: Modprobe req modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+  notify:
+    - reload sysctl
+    - restart containerd
+    - restart kubelet
+
+- name: Add apt signing keys for CRI and Kubernetes
+  apt_key:
+    url: "{{ item }}"
+    state: present
+  loop: "{{ apt_key_urls }}"
+
+- name: Add apt repository for CRI and Kubernetes
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    filename: kubernetes.list
+  loop: "{{ apt_repositories }}"
+
+- name: Install CRI and Kubernetes packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ kubernetes_node_packages }}"
+  notify:
+    - restart containerd
+    - restart kubelet
+
+- name: Hold CRI and Kubernetes packages
+  dpkg_selections:
+    name: '{{ item }}'
+    selection: hold
+  with_items:
+    - '{{ kubernetes_hold_packagges }}'
+
+- name: Force handlers after system reconfiguration
+  meta: flush_handlers
+
+- name: Check if ansible joined flag exists
+  stat:
+    path: "/etc/kubernetes/ansible_node_cluster_joined"
+  register: kubelet_conf
+  tags:
+    - always
+    - kube_node_join
+
+- name: Join to cluster if needed
+  include_tasks: join.yml
+  when: not kubelet_conf.stat.exists
+  tags:
+    - always
+    - kube_node_join

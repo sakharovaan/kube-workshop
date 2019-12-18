@@ -1,6 +1,0 @@
-// {{ ansible_managed }}
-
-// Do not install Recommended packages by default
-APT::Install-Recommends "false";
-
-{{ common_apt_configuration | default('') }}

@@ -1,0 +1,22 @@
+---
+
+- name: restart kubelet
+  service:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+
+- name: restart containerd
+  service:
+    name: containerd
+    daemon_reload: yes
+    state: restarted
+
+- name: restart haproxy
+  service:
+    name: haproxy
+    daemon_reload: yes
+    state: restarted
+
+- name: reload sysctl
+  command: "sysctl --system"

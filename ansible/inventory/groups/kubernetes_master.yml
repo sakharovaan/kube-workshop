@@ -1,5 +1,0 @@
----
-
-kubernetes_master:
-  hosts:
-    ubuntu-kube-controller.asakharov.local:

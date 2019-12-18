@@ -1,0 +1,44 @@
+---
+- name: Reset Kubernetes cluster state
+  command: "/usr/bin/kubeadm reset --force"
+  tags:
+    - always
+    - kube_node_join
+
+- name: Generate kubectl token on master
+  command: "/usr/bin/kubeadm token generate"
+  delegate_to: "{{ groups['kubernetes_master'][0] }}"
+  register: kube_token
+  tags:
+    - always
+    - kube_node_join
+
+- name: Create kubectl token on master
+  command: "/usr/bin/kubeadm token create {{ kube_token.stdout }} --ttl 10m --description {{ inventory_hostname }}"
+  delegate_to: "{{ groups['kubernetes_master'][0] }}"
+  tags:
+    - always
+    - kube_node_join
+
+- name: Join to Kubernetes cluster on node
+  command: "/usr/bin/kubeadm join --token {{ kube_token.stdout }} --discovery-token-unsafe-skip-ca-verification 127.0.0.1:5443 --node-name {{ inventory_hostname }}"
+  tags:
+    - always
+    - kube_node_join
+
+- name: Check node created on master
+  command: "/usr/bin/kubectl get nodes"
+  delegate_to: "{{ groups['kubernetes_master'][0] }}"
+  register: kube_nodes_list
+  failed_when: "inventory_hostname not in kube_nodes_list.stdout"
+  tags:
+    - always
+    - kube_node_join
+
+- name: Create cluster joined flag
+  file:
+    state: touch
+    path: "/etc/kubernetes/ansible_node_cluster_joined"
+  tags:
+    - always
+    - kube_node_join

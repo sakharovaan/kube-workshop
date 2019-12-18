@@ -1,0 +1,5 @@
+---
+
+kubernetes_node:
+  hosts:
+    kube-node-1:

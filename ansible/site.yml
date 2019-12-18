@@ -1,7 +1,0 @@
----
-
-- import_playbook: playbooks/linux_server/site.yml
-  tags:
-    - linux_server
-
-- import_playbook: playbooks/kubernetes/site.yml

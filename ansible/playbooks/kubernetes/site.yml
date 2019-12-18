@@ -1,9 +1,0 @@
----
-- hosts: 'ubuntu-kube*:{{ test_host|d() }}'
-  tasks:
-    - name: Install pip and python-setuptools
-      apt:
-        name:
-          - python-pip
-          - python-setuptools
-        state: installed

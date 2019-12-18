@@ -1,0 +1,20 @@
+---
+
+kubernetes_node_packages:
+  - kubectl=1.15.7-00
+  - kubelet=1.15.7-00
+  - kubeadm=1.15.7-00
+  - containerd.io
+
+kubernetes_hold_packagges:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+apt_key_urls:
+  - 'https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg'
+  - 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+
+apt_repositories:
+  - 'deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable'
+  - 'deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main'
